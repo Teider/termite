@@ -4,9 +4,22 @@ extern crate clap;
 
 use std::io;
 use std::io::prelude::*;
-use clap::{Arg, App, SubCommand};
+use std::sync::mpsc::{channel, Sender};
+use std::thread;
+use clap::{Arg, App, AppSettings, SubCommand};
 
 fn main() {
+    let (tx, rx) = channel();
+    thread::spawn(move || {
+        init_shell(tx);
+    });
+    loop {
+        rx.recv().unwrap();
+        break;
+    }
+}
+
+fn init_shell(tx: Sender<u64>) {
   println!("Starting termite:");
   let prompt = "λ ";
   loop {
@@ -18,16 +31,22 @@ fn main() {
       break
     }
     let matches = App::new("termite")
-                          .version("0.0.1")
+                          .setting(AppSettings::NoBinaryName)
                           .subcommand(SubCommand::with_name("quit")
                                       .about("quit termite"))
-                          .get_matches_from(parse_input(input.trim()));
+                          .get_matches_from_safe(parse_input(input.trim()));
+    if let Err(_) = matches {
+        println!("Invalid command");
+        continue;
+    }
+    let matches = matches.unwrap();
     if let Some(_) = matches.subcommand_matches("quit") {
+      //tx.send(0);
       break;
     }
   }
 }
 
 fn parse_input<'a>(input: &'a str) -> impl Iterator<Item = &'a str> {
-    Some("termite").into_iter().chain(input.split(' '))
+    input.split(' ')
 }
