@@ -1,26 +1,35 @@
 extern crate clap;
+extern crate rustyline;
 
 use std;
-use std::io;
-use std::io::prelude::*;
 use std::sync::mpsc::Sender;
 use self::clap::{App, AppSettings, SubCommand};
+use self::rustyline::Editor;
+use self::rustyline::error::ReadlineError;
 
 pub enum Command {
     Status,
 }
 
+const PROMPT: &'static str = "λ ";
+
 pub fn init_shell(_: Sender<Command>) {
     println!("Starting termite:");
-    let prompt = "λ ";
+    let mut rl = Editor::<()>::new();
     loop {
-        print!("{}", prompt);
-        io::stdout().flush().ok().expect("Could not flush stdout");
-        let mut input = String::new();
-        if let Err(error) = io::stdin().read_line(&mut input) {
-            println!("error: {}", error);
-            break;
+        let input = rl.readline(PROMPT);
+        if let Err(err) = input {
+            match err {
+                ReadlineError::Interrupted => break,
+                ReadlineError::Eof => break,
+                _ =>  {
+                    println!("Error: {:?}", err);
+                    break
+                }
+            }
         }
+        let input = input.unwrap();
+        rl.add_history_entry(&input);
         let matches = App::new("termite")
             .setting(AppSettings::NoBinaryName)
             .subcommand(SubCommand::with_name("quit").about("quit termite"))
