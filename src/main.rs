@@ -1,6 +1,7 @@
 extern crate time;
 
 mod shell;
+mod grid;
 
 use std::sync::mpsc::{channel, TryRecvError};
 use std::thread;
@@ -9,6 +10,8 @@ use time::{Duration, PreciseTime};
 const TICKS_PER_SECOND: i32 = 5;
 
 fn main() {
+    let grid: grid::Grid = grid::GridBuilder::new(4, 4).origin((1, 1)).build();
+    print!("Generated grid:\n{}\n", grid);
     let (tx, rx) = channel();
     thread::spawn(move || { shell::init_shell(tx); });
     let mut tick_count: u64 = 0;
