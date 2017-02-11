@@ -22,9 +22,9 @@ pub fn init_shell(_: Sender<Command>) {
             match err {
                 ReadlineError::Interrupted => break,
                 ReadlineError::Eof => break,
-                _ =>  {
+                _ => {
                     println!("Error: {:?}", err);
-                    break
+                    break;
                 }
             }
         }
