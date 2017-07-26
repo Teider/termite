@@ -8,8 +8,15 @@ pub enum Terrain {
     Building,
 }
 
+pub enum ResourceType {
+    Wood,
+    Minerals,
+    Food
+}
+
 // TODO(teider): Move this to another module later on
 pub struct Resource {
+    resource_type: ResourceType,
     quantity: usize,
 }
 
