@@ -20,9 +20,26 @@ pub struct Resource {
     quantity: usize,
 }
 
+impl Rand for Resource {
+    fn rand<R:Rng>(rng: &mut R) -> Resource {
+        Resource {
+            resource_type: ResourceType::Minerals,
+            quantity: 200,
+        }
+    }
+}
+
 pub struct Cell {
     terrain: Terrain,
     resources: Vec<Resource>,
+}
+
+impl Cell {
+    pub fn populate_resources(&mut self, rng: &mut XorShiftRng) {
+        if rng.gen_weighted_bool(2) {
+            self.resources.push(rng.gen());
+        }
+    }
 }
 
 pub struct Grid {
@@ -72,14 +89,16 @@ impl GridBuilder {
                     1 => Terrain::Mountain,
                     _ => Terrain::Field,
                 };
-                grid.cell.push(Cell {
+                let mut cell: Cell = Cell {
                     terrain: if (i, j) == self.origin {
                         Terrain::Building
                     } else {
                         terrain
                     },
                     resources: Vec::new(),
-                });
+                };
+                cell.populate_resources(&mut rng);
+                grid.cell.push(cell);
             }
         }
         grid
