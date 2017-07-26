@@ -1,4 +1,5 @@
 use std::fmt;
+use rand::{Rand, Rng, SeedableRng, XorShiftRng};
 
 pub enum Terrain {
     Field,
@@ -26,7 +27,7 @@ pub struct Grid {
 pub struct GridBuilder {
     width: usize,
     height: usize,
-    seed: f64,
+    seed: [u32; 4],
     origin: (usize, usize),
 }
 
@@ -35,12 +36,12 @@ impl GridBuilder {
         GridBuilder {
             width: width,
             height: height,
-            seed: 0.0,
+            seed: [1, 2, 3, 4],
             origin: (0, 0),
         }
     }
 
-    pub fn seed(&mut self, seed: f64) -> &mut GridBuilder {
+    pub fn seed(&mut self, seed: [u32; 4]) -> &mut GridBuilder {
         self.seed = seed;
         self
     }
@@ -56,12 +57,12 @@ impl GridBuilder {
             height: self.height,
             cell: Vec::with_capacity(self.width * self.height),
         };
-        let mut count = 0;
+        let mut rng: XorShiftRng = SeedableRng::from_seed(self.seed);
         for i in 0..grid.height {
             for j in 0..grid.width {
-                // TODO (teider): Generate random cells
-                let terrain: Terrain = match count % 3 {
+                let terrain: Terrain = match rng.next_u32() % 3 {
                     0 => Terrain::Woods,
+                    1 => Terrain::Mountain,
                     _ => Terrain::Field,
                 };
                 grid.cell.push(Cell {
@@ -72,7 +73,6 @@ impl GridBuilder {
                     },
                     resources: Vec::new(),
                 });
-                count = count + 1;
             }
         }
         grid

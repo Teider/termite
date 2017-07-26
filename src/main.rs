@@ -1,4 +1,5 @@
 extern crate time;
+extern crate rand;
 
 mod shell;
 mod grid;
