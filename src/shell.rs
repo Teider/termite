@@ -8,12 +8,13 @@ use self::rustyline::Editor;
 use self::rustyline::error::ReadlineError;
 
 pub enum Command {
+    Scan,
     Status,
 }
 
 const PROMPT: &'static str = "λ ";
 
-pub fn init_shell(_: Sender<Command>) {
+pub fn init_shell(tx: Sender<Command>) {
     println!("Starting termite:");
     let mut rl = Editor::<()>::new();
     loop {
@@ -33,6 +34,7 @@ pub fn init_shell(_: Sender<Command>) {
         let matches = App::new("termite")
             .setting(AppSettings::NoBinaryName)
             .subcommand(SubCommand::with_name("quit").about("quit termite"))
+            .subcommand(SubCommand::with_name("scan").about("Scans the grid for resources"))
             .get_matches_from_safe(parse_input(input.trim()));
         if let Err(_) = matches {
             println!("Invalid command");
@@ -42,6 +44,12 @@ pub fn init_shell(_: Sender<Command>) {
         if let Some(_) = matches.subcommand_matches("quit") {
             println!("Exiting termite");
             break;
+        }
+        if let Some(_) = matches.subcommand_matches("scan") {
+            if let Err(_) = tx.send(Command::Scan) {
+                println!("Error occurred when sending terminal command to game engine");
+                continue;
+            }
         }
     }
 }
