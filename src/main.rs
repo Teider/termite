@@ -20,7 +20,7 @@ fn main() {
         let frame_begin = PreciseTime::now();
         loop {
             match rx.try_recv() {
-                Ok(command) => consume_command(command),
+                Ok(command) => consume_command(command, &grid),
                 Err(TryRecvError::Empty) => break,
                 Err(TryRecvError::Disconnected) => break 'main,
             }
@@ -34,4 +34,18 @@ fn main() {
     }
 }
 
-fn consume_command(_: shell::Command) {}
+fn consume_command(_: shell::Command, grid: &grid::Grid) {
+    for i in 0..grid.height {
+        for j in 0..grid.width {
+            println!("Scanning ({}, {})", i, j);
+            if let Some(cell) = grid.get_cell(j, i) {
+                println!("Terrain type: {:?}", cell.terrain);
+                for k in 0..cell.resources.len() {
+                    println!("Cell contains {} {:?}", cell.resources[k].quantity,
+                             cell.resources[k].resource_type);
+                }
+            }
+            println!("");
+        }
+    }
+}
