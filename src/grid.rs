@@ -1,6 +1,7 @@
 use std::fmt;
 use rand::{Rand, Rng, SeedableRng, XorShiftRng};
 
+#[derive(Debug)]
 pub enum Terrain {
     Field,
     Woods,
@@ -8,6 +9,7 @@ pub enum Terrain {
     Building,
 }
 
+#[derive(Debug)]
 pub enum ResourceType {
     Wood,
     Minerals,
@@ -16,8 +18,8 @@ pub enum ResourceType {
 
 // TODO(teider): Move this to another module later on
 pub struct Resource {
-    resource_type: ResourceType,
-    quantity: usize,
+    pub resource_type: ResourceType,
+    pub quantity: usize,
 }
 
 impl Rand for Resource {
@@ -30,8 +32,8 @@ impl Rand for Resource {
 }
 
 pub struct Cell {
-    terrain: Terrain,
-    resources: Vec<Resource>,
+    pub terrain: Terrain,
+    pub resources: Vec<Resource>,
 }
 
 impl Cell {
@@ -43,9 +45,19 @@ impl Cell {
 }
 
 pub struct Grid {
-    width: usize,
-    height: usize,
+    pub width: usize,
+    pub height: usize,
     cell: Vec<Cell>,
+}
+
+impl Grid {
+    pub fn get_cell(&self, x: usize, y: usize) -> Option<&Cell> {
+        if x >= self.width || y >= self.height {
+            None
+        } else {
+            Some(&self.cell[y * self.width + x])
+        }
+    }
 }
 
 pub struct GridBuilder {
